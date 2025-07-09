@@ -7,10 +7,12 @@ import { Button } from "./components/ui/button"; // ✅ Keep this if you're usin
 import About from "./pages/About";
 import Dashboard from "./pages/Dashboard";
 import NewsArticles from "./pages/NewsArticles";
+import Header from "./components/shared/Header";
 
 const App = () => {
   return (
     <BrowserRouter>
+      <Header />
       <Routes>
         <Route path="/sign-in" element={<SignInForm />} />
         <Route path="/sign-up" element={<SignUpForm />} />
