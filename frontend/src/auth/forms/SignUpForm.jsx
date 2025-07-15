@@ -145,7 +145,7 @@ const SignUpForm = () => {
               />
               <Button
                 type="submit"
-                className="bg-[#000e4a] hover:bg-rose-500 w-full"
+                className="bg-orange-600 hover:bg-rose-500 w-full"
                 disabled={loading}
               >
                 {loading ? (

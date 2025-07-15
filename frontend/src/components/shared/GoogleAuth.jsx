@@ -37,7 +37,7 @@ const GoogleAuth = () => {
     <div>
       <Button
         type="button"
-        className="bg-green-500 w-full"
+        className="bg-green-400 text-black font-bold w-full hover:bg-rose-500"
         onClick={handleGoogleClick}
       >
         Continue with Google

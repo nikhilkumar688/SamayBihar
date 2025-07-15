@@ -2,7 +2,15 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaSearch } from "react-icons/fa";
 import { Button } from "../ui/button";
-
+import { useSelector } from "react-redux";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 const Header = () => {
   const [time, setTime] = useState(new Date());
 
@@ -26,7 +34,7 @@ const Header = () => {
     second: "2-digit",
     hour12: true,
   });
-
+  const { currentUser } = useSelector((state) => state.user);
   return (
     <header className="shadow-md sticky top-0 bg-[#c6edff] z-50">
       <div className="flex flex-wrap items-center justify-between max-w-7xl mx-auto px-4 py-3 gap-4">
@@ -74,11 +82,62 @@ const Header = () => {
               <Link to="/news">News Article</Link>
             </li>
           </ul>
-          <Link to="/sign-in">
-            <Button className="px-4 py-2 shadow-md hover:shadow-md bg-rose-800 hover:bg-rose-500 font-semibold hover:font-semibold">
-              Sign In
-            </Button>
-          </Link>
+          {currentUser ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div>
+                  <img
+                    src={currentUser.profilePicture}
+                    alt="User photo"
+                    className="w-10 h-10 rounded-full"
+                  />
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-60 bg-[#c6edff] shadow-md">
+                <DropdownMenuLabel className="font-bold">
+                  My Account
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-slate-400" />
+                <DropdownMenuItem className="block font-semibold text-sm">
+                  <div className="flex flex-col mt-2 gap-1 hover:bg-[#c6edff] shadow-md bg-[#000e4a] hover:text-black text-[#ff8572] rounded-sm">
+                    <span>@{currentUser.username}</span>
+                    <span className="text-green-400 hover:text-black">
+                      @{currentUser.email}
+                    </span>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  asChild
+                  className="w-full hover:bg-rose-500 p-0"
+                >
+                  <Link
+                    to="/dashboard?tab=profile"
+                    className="w-full px-3 py-2 text-left font-semibold rounded-sm"
+                  >
+                    Profile
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  asChild
+                  className="w-full hover:bg-rose-500 p-0"
+                >
+                  <button
+                    type="button"
+                    className="w-full px-3 py-2 text-left font-semibold  rounded-sm"
+                  >
+                    Sign Out
+                  </button>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link to="/sign-in">
+              <Button className="px-4 py-2 shadow-md hover:shadow-md bg-rose-800 hover:bg-rose-500 font-semibold hover:font-semibold">
+                Sign In
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     </header>
