@@ -14,6 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   username: z
@@ -29,9 +30,10 @@ const formSchema = z.object({
 });
 
 const SignUpForm = () => {
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
-  const navigate = useNavigate();
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -53,15 +55,19 @@ const SignUpForm = () => {
       const data = await res.json();
       if (data.success === false) {
         setLoading(false);
+        toast({ title: "Sign up failed! Please try again." });
         return setErrorMessage(data.message);
       }
       setLoading(false);
       if (res.ok) {
+        toast({ title: "Sign up Successfull!" });
         navigate("/sign-in");
       }
     } catch (error) {
       setErrorMessage(error.message);
+
       setLoading(false);
+      toast({ title: "Something went wrong!" });
     }
   }
 
@@ -139,8 +145,13 @@ const SignUpForm = () => {
               <Button
                 type="submit"
                 className="bg-[#000e4a] hover:bg-rose-500 w-full"
+                disabled={loading}
               >
-                Submit
+                {loading ? (
+                  <span className="animate-pulse">Loading...</span>
+                ) : (
+                  <span>Sign Up</span>
+                )}
               </Button>
             </form>
           </Form>
@@ -151,6 +162,7 @@ const SignUpForm = () => {
               Sign in
             </Link>
           </div>
+          {errorMessage && <p className="mt-5 text-red-500">{errorMessage}</p>}
         </div>
       </div>
     </div>
