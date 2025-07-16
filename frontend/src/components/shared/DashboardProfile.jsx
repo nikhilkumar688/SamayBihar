@@ -1,9 +1,22 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+
 const DashboardProfile = () => {
   const { currentUser } = useSelector((state) => state.user);
+  const profilePicRef = useRef();
+  const [imageFile, setImageFile] = useState(null);
+  const [imageFileUrl, setImageFileUrl] = useState(null);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    // console.log(file);
+    if (file) {
+      setImageFile(file);
+      setImageFileUrl(URL.createObjectURL(file));
+    }
+  };
 
   return (
     <div className="max-w-lg mx-auto p-3 w-full">
@@ -11,11 +24,19 @@ const DashboardProfile = () => {
         Update Your Profile
       </h1>
       <form className="flex flex-col gap-4">
+        <input
+          type="file"
+          accept="image/*"
+          hidden
+          ref={profilePicRef}
+          onChange={handleImageChange}
+        />
         <div className="w-32 h-32 self-center cursor-pointer overflow-hidden">
           <img
-            src={currentUser.profilePicture}
+            src={imageFileUrl || currentUser.profilePicture}
             alt=""
             className="rounded-full w-full h-full object-cover border-8 border-green-600"
+            onClick={() => profilePicRef.current.click()}
           />
         </div>
         <Input
@@ -31,7 +52,7 @@ const DashboardProfile = () => {
           placeholder="email"
           defaultValue={currentUser.email}
           className="h-12 border-slate-400 focus-visible:ring-0 focus-visible:ring-offset-0"
-          disabled
+          // disabled
         />
         <Input
           type="password"
