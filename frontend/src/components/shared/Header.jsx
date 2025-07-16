@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaSearch } from "react-icons/fa";
 import { Button } from "../ui/button";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +11,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { signOutSuccess } from "@/redux/user/userSlice";
 const Header = () => {
+  const dispatch = useDispatch();
   const [time, setTime] = useState(new Date());
 
   // Update time every second
@@ -35,6 +37,21 @@ const Header = () => {
     hour12: true,
   });
   const { currentUser } = useSelector((state) => state.user);
+  const handleSignOut = async () => {
+    try {
+      const res = await fetch("/api/user/signout", {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        console.log(data.message);
+      } else {
+        dispatch(signOutSuccess());
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <header className="shadow-md sticky top-0 bg-[#c6edff] z-50">
       <div className="flex flex-wrap items-center justify-between max-w-7xl mx-auto px-4 py-3 gap-4">
@@ -106,10 +123,7 @@ const Header = () => {
                     </span>
                   </div>
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  asChild
-                  className="w-full hover:bg-rose-500 p-0"
-                >
+                <DropdownMenuItem className="w-full hover:bg-rose-500 p-0">
                   <Link
                     to="/dashboard?tab=profile"
                     className="w-full px-3 py-2 text-left font-semibold rounded-sm"
@@ -119,15 +133,10 @@ const Header = () => {
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
-                  asChild
-                  className="w-full hover:bg-rose-500 p-0"
+                  className="w-full font-semibold mt-2 hover:bg-rose-500 p-0"
+                  onClick={handleSignOut}
                 >
-                  <button
-                    type="button"
-                    className="w-full px-3 py-2 text-left font-semibold  rounded-sm"
-                  >
-                    Sign Out
-                  </button>
+                  Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

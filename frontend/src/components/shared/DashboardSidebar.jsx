@@ -1,8 +1,26 @@
+import { signOutSuccess } from "@/redux/user/userSlice";
 import React from "react";
 import { FaUserEdit, FaSignOutAlt } from "react-icons/fa";
+import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 
 const DashboardSidebar = () => {
+  const dispatch = useDispatch();
+  const handleSignout = async () => {
+    try {
+      const res = await fetch("/api/user/signout", {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        console.log(data.message);
+      } else {
+        dispatch(signOutSuccess());
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <aside className="h-screen w-64 bg-gradient-to-b from-[#c6edff] to-[#000a4d] text-[#0b0544] font-sans font-bold flex flex-col">
       {/* Logo Header */}
@@ -33,7 +51,10 @@ const DashboardSidebar = () => {
 
         {/* Log Out Button */}
         <div className="p-4 mt-4 ml-2 border-t border-gray-700">
-          <button className="group flex items-center text-2xl w-full p-2 hover:text-white hover:bg-rose-500 rounded">
+          <button
+            className="group flex items-center text-2xl w-full p-2 hover:text-white hover:bg-rose-500 rounded"
+            onClick={handleSignout}
+          >
             <FaSignOutAlt className="mr-2 ml-1 mt-1 transition-transform duration-300 group-hover:animate-bounce group-hover:text-white" />
             <span>Log Out</span>
           </button>

@@ -6,6 +6,7 @@ import {
   deleteUserFailure,
   deleteUserStart,
   deleteUserSuccess,
+  signOutSuccess,
   updateFailure,
   updateStart,
   updateSuccess,
@@ -32,6 +33,8 @@ const DashboardProfile = () => {
   const [imageFile, setImageFile] = useState(null);
   const [imageFileUrl, setImageFileUrl] = useState(null);
   const [formData, setFormData] = useState({});
+
+  const token = localStorage.getItem("token");
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -70,9 +73,18 @@ const DashboardProfile = () => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(updateProfile),
       });
+
+      if (res.status === 401) {
+        localStorage.removeItem("token");
+        toast({ title: "Session expired. Please log in again." });
+        window.location.href = "/login";
+        return;
+      }
+
       const data = await res.json();
       if (!res.ok) {
         dispatch(updateFailure(data.message));
@@ -86,12 +98,24 @@ const DashboardProfile = () => {
       toast({ title: "Update User failed. Please try again!" });
     }
   };
+
   const handleDeleteUser = async () => {
     try {
       dispatch(deleteUserStart());
       const res = await fetch(`/api/user/delete/${currentUser._id}`, {
         method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+
+      if (res.status === 401) {
+        localStorage.removeItem("token");
+        toast({ title: "Session expired. Please log in again." });
+        window.location.href = "/login";
+        return;
+      }
+
       const data = await res.json();
       if (!res.ok) {
         dispatch(deleteUserFailure(data.message));
@@ -101,6 +125,21 @@ const DashboardProfile = () => {
     } catch (error) {
       console.log(error);
       dispatch(deleteUserFailure(error.message));
+    }
+  };
+  const handleSignout = async () => {
+    try {
+      const res = await fetch("/api/user/signout", {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        console.log(data.message);
+      } else {
+        dispatch(signOutSuccess());
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
   return (
@@ -183,7 +222,11 @@ const DashboardProfile = () => {
           </AlertDialogContent>
         </AlertDialog>
 
-        <Button variant="ghost" className="cursor-pointer">
+        <Button
+          variant="ghost"
+          className="cursor-pointer"
+          onClick={handleSignout}
+        >
           Sign Out
         </Button>
       </div>
