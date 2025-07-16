@@ -1,35 +1,23 @@
-import { ImageGravity } from "appwrite";
+import { ID, ImageGravity, Permission, Role } from "appwrite";
 import { appwriteConfig, storage } from "./config";
 
-//Upload file
+// Upload file with public read permission
 export async function uploadFile(file) {
   try {
     const uploadedFile = await storage.createFile(
       appwriteConfig.storageId,
       ID.unique(),
-      file
+      file,
+      [Permission.read(Role.any())] // Make file publicly viewable
     );
     return uploadedFile;
   } catch (error) {
-    console.log(error);
+    console.log("Upload error:", error);
+    throw error;
   }
 }
 
-//Get File url
-export async function getFilePreview(fileId) {
-  try {
-    const fileUrl = storage.getFilePreview(
-      appwriteConfig.storageId,
-      fileId,
-      2000,
-      2000,
-      ImageGravity.Top,
-      100
-    );
-    if (!fileUrl) throw Error;
-
-    return fileUrl;
-  } catch (error) {
-    console.log(error);
-  }
+// Get file viewable URL
+export function getFileView(fileId) {
+  return storage.getFileView(appwriteConfig.storageId, fileId);
 }
