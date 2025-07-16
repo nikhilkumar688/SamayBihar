@@ -26,7 +26,7 @@ import {
 } from "../ui/alert-dialog";
 
 const DashboardProfile = () => {
-  const { currentUser, error } = useSelector((state) => state.user);
+  const { currentUser, error, loading } = useSelector((state) => state.user);
   const profilePicRef = useRef();
   const dispatch = useDispatch();
   const { toast } = useToast();
@@ -189,8 +189,9 @@ const DashboardProfile = () => {
         <Button
           type="submit"
           className="h-12 bg-orange-600 text-[#000e4a] font-bold hover:bg-green-500"
+          disabled={loading}
         >
-          Update Profile
+          {loading ? "Loading..." : "Update Profile"}
         </Button>
       </form>
 

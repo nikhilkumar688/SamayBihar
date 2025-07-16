@@ -1,11 +1,12 @@
 import { signOutSuccess } from "@/redux/user/userSlice";
 import React from "react";
 import { FaUserEdit, FaSignOutAlt } from "react-icons/fa";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-
+import { IoIosCreate } from "react-icons/io";
 const DashboardSidebar = () => {
   const dispatch = useDispatch();
+  const { currentUser } = useSelector((state) => state.user);
   const handleSignout = async () => {
     try {
       const res = await fetch("/api/user/signout", {
@@ -37,16 +38,27 @@ const DashboardSidebar = () => {
 
       {/* Sidebar Items */}
       <nav className="flex-1 p-4">
-        <ul className="space-y-4">
+        <ul className="space-y-2">
           <li>
             <Link
               to="/dashboard?tab=profile"
-              className="group flex items-center text-xl ml-7 mt-5 p-2 hover:text-white hover:bg-rose-500 rounded"
+              className="group flex items-center p-2 hover:text-white hover:bg-rose-500 rounded"
             >
               <FaUserEdit className="mr-2 transition-transform duration-300 group-hover:text-white group-hover:animate-bounce" />
               <span>Profile</span>
             </Link>
           </li>
+          {currentUser && currentUser.isAdmin && (
+            <li>
+              <Link
+                to="/create-post"
+                className="group flex items-center p-2 hover:text-white hover:bg-rose-500 rounded"
+              >
+                <IoIosCreate className="mr-2 transition-transform duration-300 group-hover:text-white group-hover:animate-bounce" />
+                <span>Create Post</span>
+              </Link>
+            </li>
+          )}
         </ul>
 
         {/* Log Out Button */}
