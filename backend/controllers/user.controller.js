@@ -66,5 +66,7 @@ export const signout = async (req, res, next) => {
       .clearCookie("access_token")
       .status(200)
       .json("User has ben Logedout Successfully!");
-  } catch (error) {}
+  } catch (error) {
+    next(error);
+  }
 };
