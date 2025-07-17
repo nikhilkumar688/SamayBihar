@@ -14,14 +14,17 @@ import { getFileView, uploadFile } from "@/lib/appwrite/uploadImage";
 import React, { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { useNavigate } from "react-router-dom";
 
 const CreatePost = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [file, setFile] = useState(null);
   const [imageUploadError, setImageUploadError] = useState(null);
   const [imageUploading, setImageUploading] = useState(false);
 
   const [formData, setFormData] = useState({});
+  const [createPostError, setCreatePostError] = useState(null);
   const handleUploadImage = async () => {
     try {
       if (!file) {
@@ -45,12 +48,36 @@ const CreatePost = () => {
       setImageUploading(false);
     }
   };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch("/api/post/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast({ title: "Smething went wrong! Please try again." });
+        setCreatePostError(data.message);
+        return;
+      }
+      if (res.ok) {
+        toast({ title: "Article published Successfully." });
+        setCreatePostError(null);
+        navigate(`/post/${data.slug}`);
+      }
+    } catch (error) {
+      toast({ title: "Smething went wrong! Please try again." });
+      setCreatePostError("Smething went wrong! Please try again.");
+    }
+  };
   return (
     <div className="p-3 max-w-3xl mx-auto min-h-screen">
       <h1 className="text-center text-3xl my-7 font-semibold text-slate-700">
         Create a Post
       </h1>
-      <form className="flex flex-col gap-4">
+      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <div className="flex flex-col gap-4 sm:flex-row justify-between">
           <Input
             type="text"
@@ -58,8 +85,15 @@ const CreatePost = () => {
             required
             id="title"
             className="w-full sm:w-3/4 h-12 border border-slate-400 focus-visible:ring-0 focus-visible:ring-offset-0"
+            onChange={(e) =>
+              setFormData({ ...formData, title: e.target.value })
+            }
           />
-          <Select>
+          <Select
+            onValueChange={(value) =>
+              setFormData({ ...formData, category: value })
+            }
+          >
             <SelectTrigger className="w-full sm:w-1/4 h-12 border border-slate-400 focus-visible:ring-0 focus-visible:ring-offset-0">
               <SelectValue placeholder="Select a Category" />
             </SelectTrigger>
@@ -102,6 +136,9 @@ const CreatePost = () => {
           placeholder="Write Something here..."
           className="h-72 mb-12"
           required
+          onChange={(value) => {
+            setFormData({ ...formData, content: value });
+          }}
         />
         <Button
           type="submit"
@@ -109,6 +146,9 @@ const CreatePost = () => {
         >
           Publish Your Article
         </Button>
+        {createPostError && (
+          <p className="text-red-600 mt-5">{createPostError}</p>
+        )}
       </form>
     </div>
   );
