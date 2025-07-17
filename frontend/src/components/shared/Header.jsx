@@ -116,14 +116,12 @@ const Header = () => {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-slate-400" />
                 <DropdownMenuItem className="block font-semibold text-sm">
-                  <div className="flex flex-col mt-2 gap-1 hover:bg-[#c6edff] shadow-md bg-[#000e4a] hover:text-black text-[#ff8572] rounded-sm">
+                  <div className="flex flex-col mt-2 gap-1 shadow-md bg-[#000e4a]  text-[#ff8572] rounded-sm">
                     <span>@{currentUser.username}</span>
-                    <span className="text-green-400 hover:text-black">
-                      @{currentUser.email}
-                    </span>
+                    <span className="text-green-400">@{currentUser.email}</span>
                   </div>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="w-full hover:bg-rose-500 p-0">
+                <DropdownMenuItem className="w-full p-0 hover:bg-rose-500">
                   <Link
                     to="/dashboard?tab=profile"
                     className="w-full px-3 py-2 text-left font-semibold rounded-sm"
@@ -133,10 +131,12 @@ const Header = () => {
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
-                  className="w-full font-semibold mt-2 hover:bg-rose-500 p-0"
                   onClick={handleSignOut}
+                  className="w-full p-0 hover:bg-rose-500"
                 >
-                  Sign Out
+                  <span className="w-full px-3 py-2 text-left font-semibold rounded-sm">
+                    Sign Out
+                  </span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
