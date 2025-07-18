@@ -3,7 +3,7 @@ import React from "react";
 import { FaUserEdit, FaSignOutAlt } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { IoIosCreate } from "react-icons/io";
+import { IoIosCreate, IoIosDocument } from "react-icons/io";
 const DashboardSidebar = () => {
   const dispatch = useDispatch();
   const { currentUser } = useSelector((state) => state.user);
@@ -56,6 +56,18 @@ const DashboardSidebar = () => {
               >
                 <IoIosCreate className="mr-2 transition-transform duration-300 group-hover:text-white group-hover:animate-bounce" />
                 <span>Create Post</span>
+              </Link>
+            </li>
+          )}
+
+          {currentUser && currentUser.isAdmin && (
+            <li>
+              <Link
+                to="/dashboard?tab=posts"
+                className="group flex items-center p-2 hover:text-white hover:bg-rose-500 rounded"
+              >
+                <IoIosDocument className="mr-2 transition-transform duration-300 group-hover:text-white group-hover:animate-bounce" />
+                <span>Your articles</span>
               </Link>
             </li>
           )}
