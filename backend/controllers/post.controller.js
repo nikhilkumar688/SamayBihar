@@ -21,10 +21,16 @@ export const create = async (req, res, next) => {
     // Generate slug
     const slug = req.body.title
       .toString()
-      .split(" ")
-      .join("-")
-      .toLowerCase()
-      .replace(/[^a-zA-Z0-9-]/g, "");
+      .normalize("NFKD") // Normalize Unicode characters
+      .replace(/[\u0300-\u036f]/g, "") // Remove diacritics
+      .replace(/\s+/g, "-") // Replace spaces with hyphens
+      .replace(/[^\p{L}\p{N}-]+/gu, "") // Remove non-word characters except hyphens
+      .replace(/--+/g, "-") // Replace multiple hyphens with a single one
+      .replace(/^-+|-+$/g, "") // Trim hyphens from start/end
+      .split("-") // Split into words
+      .slice(0, 6) // Keep only first 6 words
+      .join("-") // Rejoin with hyphen
+      .toLowerCase(); // Lowercase if applicable
 
     // Create and save post
     const newPost = new Post({
