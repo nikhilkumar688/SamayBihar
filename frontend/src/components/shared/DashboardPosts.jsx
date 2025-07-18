@@ -14,7 +14,7 @@ import { Link } from "react-router-dom";
 const DashboardPosts = () => {
   const { currentUser } = useSelector((state) => state.user);
   const [userPosts, setUserPosts] = useState([]);
-
+  const [showMore, setShowMore] = useState(true);
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -22,6 +22,9 @@ const DashboardPosts = () => {
         const data = await res.json();
         if (res.ok) {
           setUserPosts(data.posts);
+          if (data.posts.length < 9) {
+            setShowMore(false);
+          }
         }
       } catch (error) {
         console.log(error);
@@ -36,7 +39,23 @@ const DashboardPosts = () => {
   const truncateTitle = (title, maxLength = 60) => {
     return title.length > maxLength ? title.slice(0, maxLength) + "..." : title;
   };
-
+  const handleShowMore = async () => {
+    const startIndex = userPosts.length;
+    try {
+      const res = await fetch(
+        `/api/post/getposts?userId=${currentUser._id}&startIndex=${startIndex}`
+      );
+      const data = await res.json();
+      if (res.ok) {
+        setUserPosts((prev) => [...prev, ...data.posts]);
+        if (data.posts.length < 9) {
+          setShowMore(false);
+        }
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
   return (
     <div className="flex flex-col items-center justify-center w-full p-3">
       {currentUser.isAdmin && userPosts.length > 0 ? (
@@ -98,6 +117,14 @@ const DashboardPosts = () => {
               ))}
             </TableBody>
           </Table>
+          {showMore && (
+            <button
+              onClick={handleShowMore}
+              className="w-full text-blue-700 self-center text-sm py-7"
+            >
+              Show more
+            </button>
+          )}
         </>
       ) : (
         <p>You have no post yet</p>
