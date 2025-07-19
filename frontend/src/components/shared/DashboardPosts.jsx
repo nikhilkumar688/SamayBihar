@@ -26,51 +26,54 @@ const DashboardPosts = () => {
   const { currentUser } = useSelector((state) => state.user);
 
   const [userPosts, setUserPosts] = useState([]);
-  // console.log(userPosts)
-
   const [showMore, setShowMore] = useState(true);
   const [postIdToDelete, setPostIdToDelete] = useState("");
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const res = await fetch(`/api/post/getposts?userId=${currentUser._id}`);
+        const encodedUserId = encodeURIComponent(currentUser._id);
+        const res = await fetch(`/api/post/getposts?userId=${encodedUserId}`, {
+          credentials: "include",
+        });
 
         const data = await res.json();
 
         if (res.ok) {
           setUserPosts(data.posts);
-
-          if (data.posts.length < 9) {
-            setShowMore(false);
-          }
+          if (data.posts.length < 9) setShowMore(false);
+        } else {
+          console.error(
+            "Failed to fetch posts:",
+            data.message || res.statusText
+          );
         }
       } catch (error) {
-        console.log(error);
+        console.error("Error fetching posts:", error);
       }
     };
 
-    if (currentUser.isAdmin) {
+    if (currentUser?.isAdmin && currentUser?._id) {
       fetchPosts();
     }
-  }, [currentUser._id]);
+  }, [currentUser?._id]);
 
   const handleShowMore = async () => {
     const startIndex = userPosts.length;
 
     try {
+      const encodedUserId = encodeURIComponent(currentUser._id);
       const res = await fetch(
-        `/api/post/getposts?userId=${currentUser._id}&startIndex=${startIndex}`
+        `/api/post/getposts?userId=${encodedUserId}&startIndex=${startIndex}`,
+        {
+          credentials: "include",
+        }
       );
 
       const data = await res.json();
-
       if (res.ok) {
         setUserPosts((prev) => [...prev, ...data.posts]);
-
-        if (data.posts.length < 1) {
-          setShowMore(false);
-        }
+        if (data.posts.length < 1) setShowMore(false);
       }
     } catch (error) {
       console.log(error.message);
@@ -78,8 +81,6 @@ const DashboardPosts = () => {
   };
 
   const handleDeletePost = async () => {
-    // console.log(postIdToDelete)
-
     try {
       const res = await fetch(
         `/api/post/deletepost/${postIdToDelete}/${currentUser._id}`,
@@ -120,15 +121,15 @@ const DashboardPosts = () => {
               </TableRow>
             </TableHeader>
 
-            {userPosts.map((post) => (
-              <TableBody className="divide-y" key={post._id}>
-                <TableRow>
+            <TableBody>
+              {userPosts.map((post) => (
+                <TableRow key={post._id}>
                   <TableCell>
                     {new Date(post.updatedAt).toLocaleDateString()}
                   </TableCell>
 
                   <TableCell>
-                    <Link to={`/post/${post.slug}`}>
+                    <Link to={`/post/${post._id}`}>
                       <img
                         src={post.image}
                         alt={post.title}
@@ -138,7 +139,7 @@ const DashboardPosts = () => {
                   </TableCell>
 
                   <TableCell>
-                    <Link to={`/post/${post.slug}`}>{post.title}</Link>
+                    <Link to={`/post/${post._id}`}>{post.title}</Link>
                   </TableCell>
 
                   <TableCell>{post.category}</TableCell>
@@ -147,9 +148,7 @@ const DashboardPosts = () => {
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <span
-                          onClick={() => {
-                            setPostIdToDelete(post._id);
-                          }}
+                          onClick={() => setPostIdToDelete(post._id)}
                           className="font-medium text-red-600 hover:underline cursor-pointer"
                         >
                           Delete
@@ -161,7 +160,6 @@ const DashboardPosts = () => {
                           <AlertDialogTitle>
                             Are you absolutely sure?
                           </AlertDialogTitle>
-
                           <AlertDialogDescription>
                             This action cannot be undone. This will permanently
                             delete your post and remove your data from our
@@ -191,8 +189,8 @@ const DashboardPosts = () => {
                     </Link>
                   </TableCell>
                 </TableRow>
-              </TableBody>
-            ))}
+              ))}
+            </TableBody>
           </Table>
 
           {showMore && (
