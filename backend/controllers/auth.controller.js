@@ -12,6 +12,11 @@ export const signup = async (req, res, next) => {
   }
 
   try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return next(errorHandler(400, "User already exists with this email"));
+    }
+
     const hashedPassword = bcryptjs.hashSync(password, 10);
 
     const newUser = new User({
@@ -50,14 +55,20 @@ export const signin = async (req, res, next) => {
 
     const token = jwt.sign(
       { id: validUser._id, isAdmin: validUser.isAdmin },
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
     );
 
     const { password: pass, ...rest } = validUser._doc;
 
     res
+      .cookie("access_token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // secure cookie in production
+        sameSite: "Lax", // or 'None' with `secure` if using cross-site cookies
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      })
       .status(200)
-      .cookie("access_token", token, { httpOnly: true })
       .json(rest);
   } catch (error) {
     next(error);
@@ -74,14 +85,18 @@ export const google = async (req, res, next) => {
     if (user) {
       const token = jwt.sign(
         { id: user._id, isAdmin: user.isAdmin },
-        process.env.JWT_SECRET
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
       );
       const { password: pass, ...rest } = user._doc;
       return res
-        .status(200)
         .cookie("access_token", token, {
           httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "Lax",
+          maxAge: 7 * 24 * 60 * 60 * 1000,
         })
+        .status(200)
         .json(rest);
     }
 
@@ -105,15 +120,19 @@ export const google = async (req, res, next) => {
 
     const token = jwt.sign(
       { id: newUser._id, isAdmin: newUser.isAdmin },
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
     );
     const { password: pass, ...rest } = newUser._doc;
 
     return res
-      .status(200)
       .cookie("access_token", token, {
         httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "Lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       })
+      .status(200)
       .json(rest);
   } catch (error) {
     next(error);

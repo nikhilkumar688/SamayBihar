@@ -31,6 +31,7 @@ const CommentSection = ({ postId }) => {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include", // ✅ send cookies
         body: JSON.stringify({
           content: comment,
           postId,
@@ -78,6 +79,7 @@ const CommentSection = ({ postId }) => {
         `${BASE_URL}/api/comment/likeComment/${commentId}`,
         {
           method: "PUT",
+          credentials: "include", // ✅ send cookies
         }
       );
 
@@ -119,6 +121,7 @@ const CommentSection = ({ postId }) => {
         `${BASE_URL}/api/comment/deleteComment/${commentId}`,
         {
           method: "DELETE",
+          credentials: "include", // ✅ send cookies
         }
       );
 
