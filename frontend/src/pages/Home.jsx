@@ -7,7 +7,7 @@ import { ArrowRight } from "lucide-react";
 import ToppostAdvertise from "@/components/shared/Toppostadvertise";
 
 const BASE_URL =
-  import.meta.env.VITE_BACKEND_URL || "https://sb-4z7m.onrender.com";
+  import.meta.env.VITE_BACKEND_URL || "https://samaybihar-xdtd.onrender.com";
 
 const Home = () => {
   const [posts, setPosts] = useState([]);

@@ -15,7 +15,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 const BACKEND =
-  import.meta.env.VITE_BACKEND_URL || "https://sb-4z7m.onrender.com";
+  import.meta.env.VITE_BACKEND_URL || "https://samaybihar-xdtd.onrender.com";
 
 const Search = () => {
   const location = useLocation();

@@ -18,7 +18,7 @@ import GoogleAuth from "@/components/shared/GoogleAuth";
 
 // ✅ Step 1: Define backend base URL
 const baseURL =
-  import.meta.env.VITE_BACKEND_URL || "https://sb-4z7m.onrender.com";
+  import.meta.env.VITE_BACKEND_URL || "https://samaybihar-xdtd.onrender.com";
 
 // ✅ Step 2: Zod validation schema
 const formSchema = z.object({

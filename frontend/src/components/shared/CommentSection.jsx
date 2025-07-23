@@ -8,7 +8,7 @@ import Comment from "./Comment";
 
 // ✅ Define BASE_URL once
 const BASE_URL =
-  import.meta.env.VITE_BACKEND_URL || "https://sb-4z7m.onrender.com";
+  import.meta.env.VITE_BACKEND_URL || "https://samaybihar-xdtd.onrender.com";
 
 const CommentSection = ({ postId }) => {
   const { toast } = useToast();
