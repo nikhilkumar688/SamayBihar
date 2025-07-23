@@ -16,13 +16,14 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useNavigate } from "react-router-dom";
 
+const baseURL = import.meta.env.VITE_BACKEND_URL;
+
 const CreatePost = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [file, setFile] = useState(null);
   const [imageUploadError, setImageUploadError] = useState(null);
   const [imageUploading, setImageUploading] = useState(false);
-
   const [formData, setFormData] = useState({});
   const [createPostError, setCreatePostError] = useState(null);
 
@@ -36,15 +37,12 @@ const CreatePost = () => {
       setImageUploading(true);
       setImageUploadError(null);
       const uploadedFile = await uploadFile(file);
-      const postImaageUrl = getFileView(uploadedFile.$id);
-      setFormData({ ...formData, image: postImaageUrl });
+      const postImageUrl = getFileView(uploadedFile.$id);
+      setFormData({ ...formData, image: postImageUrl });
       toast({ title: "Image Uploaded Successfully!" });
-      if (postImaageUrl) {
-        setImageUploading(false);
-      }
+      setImageUploading(false);
     } catch (error) {
       setImageUploadError("Image upload failed");
-      console.log(error);
       toast({ title: "Image upload failed" });
       setImageUploading(false);
     }
@@ -52,26 +50,36 @@ const CreatePost = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (
+      !formData.title ||
+      !formData.category ||
+      !formData.image ||
+      !formData.content
+    ) {
+      toast({ title: "All fields are required!" });
+      return;
+    }
+
     try {
-      const res = await fetch("/api/post/create", {
+      const res = await fetch(`${baseURL}/api/post/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
       const data = await res.json();
+
       if (!res.ok) {
-        toast({ title: "Smething went wrong! Please try again." });
+        toast({ title: "Something went wrong! Please try again." });
         setCreatePostError(data.message);
         return;
       }
-      if (res.ok) {
-        toast({ title: "Article published Successfully." });
-        setCreatePostError(null);
-        navigate(`/post/${data.slug}`);
-      }
+
+      toast({ title: "Article published Successfully." });
+      navigate(`/post/${data.slug}`);
     } catch (error) {
-      toast({ title: "Smething went wrong! Please try again." });
-      setCreatePostError("Smething went wrong! Please try again.");
+      toast({ title: "Something went wrong! Please try again." });
+      setCreatePostError("Something went wrong! Please try again.");
     }
   };
 
@@ -87,7 +95,6 @@ const CreatePost = () => {
               type="text"
               placeholder="Title"
               required
-              id="title"
               className="w-full sm:w-3/4 h-12 border border-slate-400 focus-visible:ring-0 focus-visible:ring-offset-0"
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
@@ -154,8 +161,9 @@ const CreatePost = () => {
           <Button
             type="submit"
             className="h-12 bg-[#111368] font-semibold hover:bg-rose-500 text-white text-md"
+            disabled={imageUploading}
           >
-            Publish Your Article
+            {imageUploading ? "Uploading Image..." : "Publish Your Article"}
           </Button>
 
           {createPostError && (

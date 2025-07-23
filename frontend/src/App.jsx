@@ -1,19 +1,27 @@
 import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import SignInForm from "./auth/forms/SignInForm";
-import SignUpForm from "./auth/forms/SignUpForm";
+
+// Pages
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Dashboard from "./pages/Dashboard";
 import Search from "./pages/Search";
-import Header from "./components/shared/Header";
-import Footer from "./components/shared/Footer";
-import PrivateRoute from "./components/shared/PrivateRoute";
-import AdminPrivateRoute from "./components/shared/AdminPrivateRoute";
 import CreatePost from "./pages/CreatePost";
 import EditPost from "./pages/EditPost";
 import PostDetails from "./pages/PostDetails";
+
+// Auth
+import SignInForm from "./auth/forms/SignInForm";
+import SignUpForm from "./auth/forms/SignUpForm";
+
+// Shared Components
+import Header from "./components/shared/Header";
+import Footer from "./components/shared/Footer";
 import ScrollToTop from "./components/shared/ScrollToTop";
+import PrivateRoute from "./components/shared/PrivateRoute";
+import AdminPrivateRoute from "./components/shared/AdminPrivateRoute";
+
+// UI
 import { Toaster } from "./components/ui/toaster";
 
 const App = () => {
@@ -31,7 +39,7 @@ const App = () => {
         <Route path="/news" element={<Search />} />
         <Route path="/post/:postSlug" element={<PostDetails />} />
 
-        {/* Protected Routes */}
+        {/* Protected Routes (User) */}
         <Route element={<PrivateRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
         </Route>
@@ -42,11 +50,15 @@ const App = () => {
           <Route path="/update-post/:postId" element={<EditPost />} />
         </Route>
 
-        {/* Catch-all for 404 */}
+        {/* 404 Route */}
         <Route
           path="*"
           element={
-            <h1 className="text-center text-3xl py-10">404 - Page Not Found</h1>
+            <div className="min-h-screen flex items-center justify-center">
+              <h1 className="text-3xl font-semibold text-red-500">
+                404 - Page Not Found
+              </h1>
+            </div>
           }
         />
       </Routes>

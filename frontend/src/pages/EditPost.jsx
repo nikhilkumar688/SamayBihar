@@ -17,9 +17,16 @@ import "react-quill/dist/quill.snow.css";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 
-// You can also import BASE_URL from a config if you have it:
 const BASE_URL =
   import.meta.env.VITE_BACKEND_URL || "https://samaybihar-xdtd.onrender.com";
+
+const CATEGORY_OPTIONS = [
+  { value: "Worldnews", label: "World News" },
+  { value: "sportsnews", label: "Sports News" },
+  { value: "localnews", label: "Local News" },
+  { value: "crimenews", label: "Crime News" },
+  { value: "politicsnews", label: "Politics News" },
+];
 
 const EditPost = () => {
   const { toast } = useToast();
@@ -28,37 +35,42 @@ const EditPost = () => {
   const { currentUser } = useSelector((state) => state.user);
 
   const [file, setFile] = useState(null);
-  const [imageUploadError, setImageUploadError] = useState(null);
   const [imageUploading, setImageUploading] = useState(false);
+  const [imageUploadError, setImageUploadError] = useState(null);
+
   const [formData, setFormData] = useState({});
+  const [loadingPost, setLoadingPost] = useState(true);
   const [updatePostError, setUpdatePostError] = useState(null);
 
+  // Fetch post
   useEffect(() => {
     const fetchPost = async () => {
+      setLoadingPost(true);
       try {
         const res = await fetch(
           `${BASE_URL}/api/post/getposts?postId=${postId}`,
-          {
-            credentials: "include",
-          }
+          { credentials: "include" }
         );
         const data = await res.json();
+
         if (!res.ok) {
-          console.error("Error fetching post:", data.message);
-          setUpdatePostError(data.message);
+          setUpdatePostError(data.message || "Failed to fetch post.");
         } else {
           setFormData(data.posts[0] || {});
           setUpdatePostError(null);
         }
       } catch (error) {
-        console.error("Error fetching post:", error);
-        setUpdatePostError("Something went wrong while fetching post.");
+        setUpdatePostError("Error fetching post data.");
+        console.error("Error:", error);
+      } finally {
+        setLoadingPost(false);
       }
     };
 
     fetchPost();
   }, [postId]);
 
+  // Upload image
   const handleUploadImage = async () => {
     if (!file) {
       setImageUploadError("Please select an image!");
@@ -75,13 +87,14 @@ const EditPost = () => {
       toast({ title: "Image uploaded successfully!" });
     } catch (error) {
       setImageUploadError("Image upload failed");
-      console.error("Upload error:", error);
       toast({ title: "Image upload failed" });
+      console.error(error);
     } finally {
       setImageUploading(false);
     }
   };
 
+  // Submit post
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -98,19 +111,27 @@ const EditPost = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        toast({ title: "Something went wrong! Please try again." });
-        setUpdatePostError(data.message);
+        setUpdatePostError(data.message || "Update failed.");
+        toast({ title: "Update failed. Please try again." });
         return;
       }
 
       toast({ title: "Article updated successfully!" });
       navigate(`/post/${data.slug}`);
     } catch (error) {
-      console.error("Update failed:", error);
-      toast({ title: "Something went wrong! Please try again." });
-      setUpdatePostError("Something went wrong! Please try again.");
+      console.error("Update error:", error);
+      toast({ title: "Something went wrong!" });
+      setUpdatePostError("Something went wrong. Try again.");
     }
   };
+
+  if (loadingPost) {
+    return (
+      <div className="text-center py-20 text-xl text-slate-600">
+        Loading post data...
+      </div>
+    );
+  }
 
   return (
     <div className="p-3 max-w-3xl mx-auto min-h-screen">
@@ -119,6 +140,7 @@ const EditPost = () => {
       </h1>
 
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+        {/* Title and Category */}
         <div className="flex flex-col gap-4 sm:flex-row justify-between">
           <Input
             type="text"
@@ -126,16 +148,17 @@ const EditPost = () => {
             required
             id="title"
             className="w-full sm:w-3/4 h-12 border border-slate-400 focus-visible:ring-0 focus-visible:ring-offset-0"
-            onChange={(e) =>
-              setFormData({ ...formData, title: e.target.value })
-            }
             value={formData.title || ""}
-          />
-          <Select
-            onValueChange={(value) =>
-              setFormData({ ...formData, category: value })
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, title: e.target.value }))
             }
+          />
+
+          <Select
             value={formData.category || ""}
+            onValueChange={(value) =>
+              setFormData((prev) => ({ ...prev, category: value }))
+            }
           >
             <SelectTrigger className="w-full sm:w-1/4 h-12 border border-slate-400 focus-visible:ring-0 focus-visible:ring-offset-0">
               <SelectValue placeholder="Select a Category" />
@@ -143,16 +166,17 @@ const EditPost = () => {
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>Category</SelectLabel>
-                <SelectItem value="Worldnews">World News</SelectItem>
-                <SelectItem value="sportsnews">Sports News</SelectItem>
-                <SelectItem value="localnews">Local News</SelectItem>
-                <SelectItem value="crimenews">Crime News</SelectItem>
-                <SelectItem value="politicsnews">Politics News</SelectItem>
+                {CATEGORY_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
               </SelectGroup>
             </SelectContent>
           </Select>
         </div>
 
+        {/* Image Upload */}
         <div className="flex gap-4 items-center justify-between border-4 border-slate-600 border-dotted p-3">
           <Input
             type="file"
@@ -174,19 +198,21 @@ const EditPost = () => {
           <img
             src={formData.image}
             alt="Uploaded"
-            className="w-full h-96 object-cover"
+            className="w-full h-96 object-cover rounded-md"
           />
         )}
 
+        {/* Editor */}
         <ReactQuill
           theme="snow"
-          placeholder="Write something here..."
-          className="h-72 mb-12"
-          required
-          onChange={(value) => setFormData({ ...formData, content: value })}
+          className="h-72 mb-12 bg-white"
           value={formData.content || ""}
+          onChange={(value) =>
+            setFormData((prev) => ({ ...prev, content: value }))
+          }
         />
 
+        {/* Submit */}
         <Button
           type="submit"
           className="h-12 bg-[#111368] font-semibold hover:bg-rose-500 max-sm:mt-5 text-md"
