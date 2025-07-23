@@ -1,9 +1,8 @@
-// server.js or index.js
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import cors from "cors"; // ✅ IMPORT CORS
+import cors from "cors"; // ✅ CORS
 
 import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
@@ -15,16 +14,17 @@ dotenv.config();
 
 const app = express();
 
-// ✅ CORS Configuration — allow your Vercel frontend
+// ✅ Corrected CORS configuration
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://sb-xi-jet.vercel.app", // your deployed frontend
+  "https://samaybihar.vercel.app", // ✅ removed trailing slash
 ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin || allowedOrigins.includes(origin.replace(/\/$/, ""))) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
@@ -34,18 +34,18 @@ app.use(
   })
 );
 
-// ✅ JSON & cookies
+// ✅ Middleware
 app.use(express.json());
 app.use(cookieParser());
 
-// ✅ API Routes
+// ✅ API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/post", postRoutes);
 app.use("/api/comment", commentRoutes);
 app.use("/api/analytics", analyticsRoutes);
 
-// ✅ Global Error Handler
+// ✅ Global error handler
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal Server Error";
@@ -56,17 +56,16 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ✅ Connect to DB and start server
+// ✅ Connect to MongoDB and start server
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
-    console.log("Database is connected");
+    console.log("✅ Database connected");
 
-    // Only start server after DB connects
     app.listen(5000, () => {
-      console.log("Server is running on port 5000");
+      console.log("🚀 Server running on port 5000");
     });
   })
   .catch((err) => {
-    console.error("MongoDB connection failed:", err);
+    console.error("❌ MongoDB connection failed:", err);
   });
