@@ -1,4 +1,3 @@
-// index.js or server.js
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
@@ -11,43 +10,34 @@ import postRoutes from "./routes/post.routes.js";
 import commentRoutes from "./routes/comment.route.js";
 import analyticsRoutes from "./routes/analytics.route.js";
 
-// ✅ Load environment variables
 dotenv.config();
 
 const app = express();
 
-// ✅ Allowed frontend origins
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://samaybihar.vercel.app",
-];
-
-// ✅ CORS configuration
+// ✅ Basic CORS Setup
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin.replace(/\/$/, ""))) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true, // to allow sending cookies
+    origin: ["http://localhost:3000", "https://samaybihar.vercel.app"],
+    credentials: true,
   })
 );
 
-// ✅ Middleware setup
-app.use(express.json()); // to parse JSON requests
-app.use(cookieParser()); // to parse cookies
+app.use(express.json());
+app.use(cookieParser());
 
-// ✅ Route handlers
+// ✅ Health check route
+app.get("/", (req, res) => {
+  res.status(200).send("Backend working ✅");
+});
+
+// ✅ API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/post", postRoutes);
 app.use("/api/comment", commentRoutes);
 app.use("/api/analytics", analyticsRoutes);
 
-// ✅ Global error handler
+// ✅ Global Error Handler
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal Server Error";
@@ -59,7 +49,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ✅ Connect to MongoDB and start server
+// ✅ Connect to MongoDB and Start Server
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
